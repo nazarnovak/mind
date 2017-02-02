@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+
+		<title>MinDoktor Challenge</title>
+
+		<link rel="stylesheet"
+        		href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/css/mind.css">
+	</head>
+
+	<body>
+		<div class="wrapper">
+			<div class="container-fluid">
+				{{template "content" .}}
+			</div>
+		</div>
+
+		<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+		<script src="/js/glue.min.js"></script>
+		{{template "scripts" .}}
+	</body>
+</html>
