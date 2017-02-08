@@ -1,8 +1,8 @@
 package api
 
 import(
-	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/nazarnovak/mind/data"
 )
@@ -15,15 +15,10 @@ func NewCase(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(id)
-	if err != nil {
-		ServeInternalServerError(w, r)
-		return
-	}
-
 	err = data.GreetMessage(id)
 	if err != nil {
 		ServeInternalServerError(w, r)
 	}
+
+	http.Redirect(w, r, "/cases/" + strconv.Itoa(id), 303)
 }

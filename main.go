@@ -3,24 +3,25 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/desertbit/glue"
 	"github.com/nazarnovak/mind/data"
 )
 
-//TODO
-//User Cookie to authenticate
-
 func main() {
-	err := LoadEnvFile()
+	err := LoadConfig()
 	if err != nil {
 		log.Fatalln(err)
 	}
 
+	err = data.OpenDB(
+		conf.DB.Host,
+		conf.DB.Port,
+		conf.DB.User,
+		conf.DB.Password,
+		conf.DB.Name,
+	)
 
-
-	err = data.OpenDB()
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -30,7 +31,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	err = data.InitHub()
+	err = data.InitHub(conf.Redis.URL)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -44,14 +45,16 @@ func main() {
 	cssFS := http.FileServer(http.Dir("public/css"))
 	jsFS := http.FileServer(http.Dir("public/js"))
 
+	// NotLikeThis
+	data.Greet = conf.App.Greet
+
 	http.Handle("/", UIRouter)
 	http.Handle("/css/",http.StripPrefix("/css", cssFS))
 	http.Handle("/js/", http.StripPrefix("/js", jsFS))
 	http.Handle("/glue/", glueSrv)
 
-	port := os.Getenv("PORT")
-	log.Printf("Listening on :%s", port)
-	err = http.ListenAndServe(":"+port, nil)
+	log.Printf("Listening on :%s", conf.App.Port)
+	err = http.ListenAndServe(":" + conf.App.Port, nil)
 	if err != nil {
 		log.Fatalln(err)
 	}

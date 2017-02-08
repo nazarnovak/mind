@@ -19,7 +19,7 @@ func init() {
 		HandlerFunc(public.GetCase)
 	UIRouter.NewRoute().
 		Methods("POST").
-		Path("/api/cases/new").
+		Path("/cases/new").
 		HandlerFunc(api.NewCase)
 	UIRouter.NewRoute().
 		Methods("GET").

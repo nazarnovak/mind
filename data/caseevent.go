@@ -2,8 +2,9 @@ package data
 
 import (
 	"time"
-	"os"
 )
+
+var Greet string
 
 const (
 	System   = 0
@@ -33,7 +34,7 @@ func GreetMessage(id int) error {
 	ce.UserId = System
 	ce.TypeId = Messages
 	ce.Created = time.Now().Format(time.RFC3339)
-	ce.Content = os.Getenv("MIND_GREET")
+	ce.Content = Greet
 
 	_, err := ce.Put()
 	if err != nil {

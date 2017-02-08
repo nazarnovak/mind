@@ -1,10 +1,12 @@
 {{define "content"}}
     <div class="container text-center">
         <br />
-        <button id="newcase" class="btn btn-primary">New case</button>
+        <form method="POST" action="/cases/new">
+            <button id="newcase" class="btn btn-primary" type="submit">
+                New case
+            </button>
+        </form>
     </div>
 {{end}}
 
-{{define "scripts"}}
-    <script src="/js/index.js"></script>
-{{end}}
+{{define "scripts"}}{{end}}

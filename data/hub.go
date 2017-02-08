@@ -2,7 +2,6 @@ package data
 
 import (
 	"log"
-	"os"
 	"strings"
 	"sync"
 
@@ -20,8 +19,7 @@ var (
 	l sync.RWMutex
 )
 
-func InitHub() error {
-	url := os.Getenv("REDIS_URL")
+func InitHub(url string) error {
 	c, err := redis.DialURL(url)
 	if err != nil {
 		return err

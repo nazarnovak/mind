@@ -1,48 +1,48 @@
 package main
 
 import (
-	"bufio"
-	"io"
+	"encoding/json"
 	"flag"
-	"os"
-	"strings"
+	"io/ioutil"
 )
 
-var port *string
+type Config struct {
+	App `json:"app"`
+	DB `json:"db"`
+	Redis `json:"redis"`
+}
 
-func LoadEnvFile() error {
-	port = flag.String("port", "8080", "Server port")
-	dEnvFile := ".env"
-	envFile := flag.String("env-file", dEnvFile, "Environment file")
+type App struct {
+	Greet string `json:"greet"`
+	Port string
+}
+
+type DB struct {
+	Host string `json:"host"`
+	Port string `json:"port"`
+	User string `json:"user"`
+	Password string `json:"password"`
+	Name string `json:"name"`
+}
+
+type Redis struct {
+	URL string `json:"url"`
+}
+
+var conf Config
+
+func LoadConfig() error {
+	port := flag.String("port", "8080", "Server port")
+	cFile := flag.String("conf", "config.json", "Config file")
 	flag.Parse()
 
-	os.Setenv("PORT", *port)
-
-	f, err := os.Open(*envFile)
+	raw, err := ioutil.ReadFile(*cFile)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 
-	r := bufio.NewReader(f)
-	for {
-		ln, err := r.ReadString('\n')
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-
-		parts := strings.SplitN(ln, "=", 2)
-		if len(parts) != 2 {
-			continue
-		}
-		err = os.Setenv(parts[0], strings.TrimSpace(parts[1]))
-		if err != nil {
-			return err
-		}
-	}
+	json.Unmarshal(raw, &conf)
+	conf.App.Port = *port
 
 	return nil
 }

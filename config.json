@@ -1,0 +1,15 @@
+{
+    "app": {
+      "greet": "Welcome to Min Doktor"
+    },
+    "db": {
+        "host": "localhost",
+        "port": "5432",
+        "user": "postgres",
+        "password": "1",
+        "name": "mind"
+    },
+    "redis": {
+        "url": "redis://localhost:6379"
+    }
+}
