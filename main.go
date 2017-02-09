@@ -6,13 +6,17 @@ import (
 
 	"github.com/desertbit/glue"
 	"github.com/nazarnovak/mind/data"
+	"github.com/nazarnovak/mind/router"
 )
 
 func main() {
+
 	err := LoadConfig()
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	data.SetGreetMessage(conf.App.Greet)
 
 	err = data.OpenDB(
 		conf.DB.Host,
@@ -45,10 +49,9 @@ func main() {
 	cssFS := http.FileServer(http.Dir("public/css"))
 	jsFS := http.FileServer(http.Dir("public/js"))
 
-	// NotLikeThis
-	data.Greet = conf.App.Greet
+	router.SetRoutes()
 
-	http.Handle("/", UIRouter)
+	http.Handle("/", router.Router)
 	http.Handle("/css/",http.StripPrefix("/css", cssFS))
 	http.Handle("/js/", http.StripPrefix("/js", jsFS))
 	http.Handle("/glue/", glueSrv)

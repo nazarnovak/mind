@@ -9,6 +9,7 @@ import(
 
 func NewCase(w http.ResponseWriter, r *http.Request) {
 	c := data.Case{}
+
 	id, err := c.Put()
 	if err != nil {
 		ServeBadRequest(w, r)

@@ -24,3 +24,18 @@ func GetUserById(id string) (*User, error) {
 		return &u, nil
 	}
 }
+
+func GetUserByName(name string) (*User, error) {
+	u := User{}
+
+	err := DB.QueryRow("SELECT id, name, role FROM users WHERE name=$1",
+		name).Scan(&u.ID, &u.Name, &u.Role)
+	switch {
+	case err == sql.ErrNoRows:
+		return nil, nil
+	case err != nil:
+		return nil, err
+	default:
+		return &u, nil
+	}
+}

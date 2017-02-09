@@ -4,8 +4,6 @@ import (
 	"time"
 )
 
-var Greet string
-
 const (
 	System   = 0
 	Messages = 0
@@ -26,6 +24,12 @@ type Message struct {
 	UserRole string
 	Created  time.Time
 	Content  string
+}
+
+var Greet string
+
+func SetGreetMessage(msg string) {
+	Greet = msg
 }
 
 func GreetMessage(id int) error {

@@ -1,12 +1,39 @@
 {{define "content"}}
     <div class="container text-center">
         <br />
-        <form method="POST" action="/cases/new">
-            <button id="newcase" class="btn btn-primary" type="submit">
-                New case
-            </button>
-        </form>
+        {{if .User}}
+            <form method="GET" action="/logout">
+                Logged in as {{.User}}
+                <button id="logout" class="btn btn-danger" type="submit">
+                    Logout
+                </button>
+            </form>
+            <br />
+            <form method="POST" action="/cases/new">
+                <button id="newcase" class="btn btn-warning" type="submit">
+                    New case
+                </button>
+            </form>
+        {{else}}
+            <form method="POST" action="/login">
+                <p>Please log in</p>
+                <button class="btn btn-primary" type="submit" name="user"
+                    value="Nazar Novak">As patient</button>
+                <!--<button class="btn btn-success" type="submit" name="user"
+                value="doctor">As doctor</button>-->
+            </form>
+        {{end}}
     </div>
+    {{if .Cases}}
+    <div class="container">
+        <h4>My cases:</h4>
+        <ul id="cases-list">
+            {{range .Cases}}
+            <li><a href="/cases/{{.}}">Case #{{.}}</a></li>
+            {{end}}
+        </ul>
+    </div>
+    {{end}}
 {{end}}
 
 {{define "scripts"}}{{end}}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"io/ioutil"
+	"errors"
 )
 
 type Config struct {
@@ -42,6 +43,11 @@ func LoadConfig() error {
 	}
 
 	json.Unmarshal(raw, &conf)
+
+	if conf.App.Greet == "" || conf.DB.Host == "" || conf.Redis.URL == "" {
+		return errors.New("Loading config failed")
+	}
+
 	conf.App.Port = *port
 
 	return nil
