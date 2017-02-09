@@ -31,7 +31,19 @@
 
     getMessages();
 
-    socket.send("sub case:" + caseId);
+    socket.on("connected", function() {
+        console.log("Connected to WS");
+        socket.send("sub case:" + caseId);
+    });
+
+    socket.on("disconnected", function() {
+        console.log("Disconnected from WS");
+    });
+
+    socket.on("reconnecting", function() {
+        console.log("Reconnecting to WS");
+        socket.send("sub case:" + caseId);
+    });
 
     socket.onMessage(function(data) {
         data = data.split(":");
