@@ -3,7 +3,6 @@ package router
 import (
 	"github.com/gorilla/mux"
 
-	"github.com/nazarnovak/mind/api"
 	"github.com/nazarnovak/mind/controllers"
 )
 
@@ -33,9 +32,9 @@ func SetRoutes() {
 	Router.NewRoute().
 		Methods("GET").
 		Path("/api/cases/{caseId:[0-9]+}/events").
-		HandlerFunc(api.GetCaseMessages)
+		HandlerFunc(controllers.GetCaseMessages)
 	Router.NewRoute().
 		Methods("POST").
 		Path("/api/cases/{caseId:[0-9]+}/events").
-		HandlerFunc(api.CreateCaseMessage)
+		HandlerFunc(controllers.CreateCaseMessage)
 }

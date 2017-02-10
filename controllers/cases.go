@@ -12,10 +12,15 @@ import(
 
 func NewCase(w http.ResponseWriter, r *http.Request) {
 	user, err := getSessionUser(r)
-	if err != nil || user == nil {
-		log.Println("Couldn't get user from session when creating " +
-			"a case")
-		serveBadRequest(w, r)
+	if err != nil {
+		log.Println("Error while getting user from session: " + err.Error())
+		serveInternalServerError(w, r)
+		return
+	}
+
+	if user == nil {
+		log.Println("Not logged in")
+		serveNotFound(w, r)
 		return
 	}
 
@@ -43,23 +48,29 @@ func GetCase(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	caseIdStr := vars["caseId"]
 
-	c, err := data.GetCaseById(caseIdStr)
+	user, err := getSessionUser(r)
+	if err != nil {
+		log.Println("Error while getting user from session: " + err.Error())
+		serveInternalServerError(w, r)
+		return
+	}
+
+	if user == nil {
+		log.Println("Not logged in")
+		serveNotFound(w, r)
+		return
+	}
+
+	c, err := data.GetCaseByIdCreatorId(caseIdStr, user.ID)
 	if err != nil {
 		log.Println("Couldn't get case id " + caseIdStr)
 		serveInternalServerError(w, r)
 		return
 	}
 	if c == nil {
-		log.Println("Cased id " + caseIdStr + " not found in db")
+		log.Println("Cased id " + caseIdStr + " not found in db; " +
+			"User id " + strconv.Itoa(user.ID))
 		serveNotFound(w, r)
-		return
-	}
-
-	user, err:= getSessionUser(r)
-	if err != nil || user == nil {
-		log.Println("Couldn't get user from session when creating " +
-			"a case")
-		serveBadRequest(w, r)
 		return
 	}
 
@@ -83,3 +94,4 @@ func GetCase(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+

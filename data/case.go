@@ -29,10 +29,13 @@ func (c *Case) Put() (int, error) {
 	return id, nil
 }
 
-func GetCaseById(id string) (*Case, error) {
+func GetCaseByIdCreatorId(idStr string, cId int) (*Case, error) {
+	cIdStr := strconv.Itoa(cId)
+
 	c := Case{}
-	err := DB.QueryRow("SELECT id FROM cases WHERE id=$1", id).
-		Scan(&c.ID)
+	err := DB.QueryRow("SELECT id FROM cases WHERE id=$1 AND creatorid=$2",
+		idStr, cIdStr).Scan(&c.ID)
+
 	switch {
 	case err == sql.ErrNoRows:
 		return nil, nil
@@ -46,7 +49,7 @@ func GetCaseById(id string) (*Case, error) {
 func GetCasesByCreatorId(cId int) ([]int, error) {
 	cIdStr := strconv.Itoa(cId)
 
-	row, err := DB.Query("SELECT id FROM cases WHERE creatorid=$1", cIdStr)
+	rows, err := DB.Query("SELECT id FROM cases WHERE creatorid=$1", cIdStr)
 
 	if err == sql.ErrNoRows {
 		return []int{}, nil
@@ -57,8 +60,8 @@ func GetCasesByCreatorId(cId int) ([]int, error) {
 	var id int
 	cases := []int{}
 
-	for row.Next() {
-		err = row.Scan(&id)
+	for rows.Next() {
+		err = rows.Scan(&id)
 		if err != nil {
 			return []int{}, err
 		}

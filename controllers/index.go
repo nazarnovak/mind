@@ -4,12 +4,13 @@ import(
 	"html/template"
 	"log"
 	"net/http"
-	//"github.com/gorilla/sessions"
+
 	"github.com/nazarnovak/mind/data"
 )
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	var userName string
+	var casesIds []int
 
 	user, err := getSessionUser(r)
 	if err != nil {
@@ -20,9 +21,14 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 	if user != nil {
 		userName = user.Name
-	}
 
-	casesIds, err := data.GetCasesByCreatorId(user.ID)
+		casesIds, err = data.GetCasesByCreatorId(user.ID)
+		if err != nil {
+			log.Println(err)
+			serveInternalServerError(w, r)
+			return
+		}
+	}
 
 	data := struct{
 		User string
