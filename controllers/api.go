@@ -10,6 +10,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/nazarnovak/mind/data"
+	"errors"
 )
 
 const (
@@ -126,8 +127,9 @@ func CreateCaseMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if strings.HasPrefix(e.Message, supportCmd) {
-		notifySupport(strings.TrimLeft(e.Message, supportCmd))
+	err = checkUserMessage(c.ID, c.DoctorId, e.Message)
+	if err != nil {
+		log.Println("Error checking user message:" + err.Error())
 	}
 
 	ce := data.CaseEvent{}
@@ -148,6 +150,41 @@ func CreateCaseMessage(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
+}
+
+func checkUserMessage(caseId int, doctorId int, msg string) error {
+	if msg == "/submit" && doctorId == 0 {
+		err := assignDoctor(caseId)
+		if err != nil {
+			return err
+		}
+	}
+
+	if strings.HasPrefix(msg, supportCmd) {
+		var sMsg= strings.TrimLeft(msg, supportCmd)
+		notifySupport(sMsg)
+		return nil
+	}
+
+	return nil
+}
+
+func assignDoctor(caseId int) error {
+	doctorId, err := data.GetRandomDoctorId()
+	if err != nil {
+		return err
+	}
+
+	if doctorId == 0 {
+		return errors.New("There are no doctors in DB")
+	}
+
+	err = data.AssignDoctorToCase(doctorId, caseId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func notifySupport(msg string) {

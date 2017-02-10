@@ -8,12 +8,13 @@ import (
 type Case struct {
 	ID int
 	CreatorId int
+	DoctorId int
 }
 
 func (c *Case) Put() (int, error) {
 	var id int
 
-	row, err := DB.Query("INSERT INTO cases VALUES(DEFAULT, $1) " +
+	row, err := DB.Query("INSERT INTO cases VALUES(DEFAULT, $1, DEFAULT)" +
 		"returning id;", c.CreatorId)
 	if err != nil {
 		return id, err
@@ -33,8 +34,9 @@ func GetCaseByIdCreatorId(idStr string, cId int) (*Case, error) {
 	cIdStr := strconv.Itoa(cId)
 
 	c := Case{}
-	err := DB.QueryRow("SELECT id FROM cases WHERE id=$1 AND creatorid=$2",
-		idStr, cIdStr).Scan(&c.ID)
+	err := DB.QueryRow("SELECT id, creatorid, doctorid FROM cases WHERE " +
+		"id=$1 AND creatorid=$2;",
+		idStr, cIdStr).Scan(&c.ID, &c.CreatorId, &c.DoctorId)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -69,4 +71,17 @@ func GetCasesByCreatorId(cId int) ([]int, error) {
 	}
 
 	return cases, nil
+}
+
+func AssignDoctorToCase(doctorId int, caseId int) error {
+	var rId int
+
+	err := DB.QueryRow("UPDATE cases SET doctorid=$1 WHERE id=$2 " +
+		"returning id;",
+		doctorId, caseId).Scan(&rId)
+	if err != nil || rId == 0 {
+		return err
+	}
+
+	return nil
 }

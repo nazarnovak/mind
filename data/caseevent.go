@@ -55,7 +55,7 @@ func GetCaseEventsByCaseId(caseId string, since string) ([]Message, error) {
 		FROM case_events ce
 		JOIN users u on ce.userid = u.id
 		WHERE caseid=$1 AND typeid=$2 AND created > $3
-		ORDER BY created`
+		ORDER BY created;`
 
 	rows, err := DB.Query(q, caseId, Messages, since)
 
