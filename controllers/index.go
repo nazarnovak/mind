@@ -6,10 +6,12 @@ import(
 	"net/http"
 
 	"github.com/nazarnovak/mind/data"
+	"errors"
 )
 
 func Index(w http.ResponseWriter, r *http.Request) {
 	var userName string
+	var userRole int
 	var casesIds []int
 
 	user, err := getSessionUser(r)
@@ -21,8 +23,17 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 	if user != nil {
 		userName = user.Name
+		userRole = user.Role
 
-		casesIds, err = data.GetCasesByCreatorId(user.ID)
+		switch user.Role {
+		case data.ROLEPATIENT:
+			casesIds, err = data.GetCasesByCreatorId(user.ID)
+		case data.ROLEDOCTOR:
+			casesIds, err = data.GetCasesByDoctorId(user.ID)
+		default:
+			err = errors.New("Unknown role")
+		}
+
 		if err != nil {
 			log.Println(err)
 			serveInternalServerError(w, r)
@@ -31,10 +42,12 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := struct{
-		User string
+		UserName string
+		UserRole int
 		Cases []int
 	}{
 		userName,
+		userRole,
 		casesIds,
 	}
 

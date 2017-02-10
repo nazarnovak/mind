@@ -1,28 +1,30 @@
 {{define "content"}}
     <div class="container text-center">
-        <br />
-        {{if .User}}
-            <form method="GET" action="/logout">
-                Logged in as {{.User}}
-                <button id="logout" class="btn btn-danger" type="submit">
-                    Logout
-                </button>
-            </form>
-            <br />
-            <form method="POST" action="/cases/new">
-                <button id="newcase" class="btn btn-warning" type="submit">
-                    New case
-                </button>
-            </form>
-        {{else}}
-            <form method="POST" action="/login">
-                <p>Please log in</p>
-                <button class="btn btn-primary" type="submit" name="user"
-                    value="Nazar Novak">As patient</button>
-                <!--<button class="btn btn-success" type="submit" name="user"
-                value="doctor">As doctor</button>-->
-            </form>
+    <br />
+    {{if .UserName}}
+    <form method="GET" action="/logout">
+        Logged in as {{.UserName}}
+        <button id="logout" class="btn btn-danger" type="submit">
+            Logout
+        </button>
+    </form>
+    <br />
+        {{if eq .UserRole 0}}
+        <form method="POST" action="/cases/new">
+            <button id="newcase" class="btn btn-warning" type="submit">
+                New case
+            </button>
+        </form>
         {{end}}
+    {{else}}
+        <form method="POST" action="/login">
+            <p>Please log in</p>
+            <button class="btn btn-primary" type="submit" name="user"
+                value="Nazar Novak">As patient</button>
+            <button class="btn btn-success" type="submit" name="user"
+                value="Doctor X">As doctor</button>
+        </form>
+    {{end}}
     </div>
     {{if .Cases}}
     <div class="container">

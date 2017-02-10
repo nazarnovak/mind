@@ -4,6 +4,11 @@ import (
 	"database/sql"
 )
 
+const (
+	ROLEPATIENT = 0
+	ROLEDOCTOR = 1
+)
+
 type User struct {
 	ID int
 	Name string
@@ -43,8 +48,8 @@ func GetUserByName(name string) (*User, error) {
 func GetRandomDoctorId() (int, error) {
 	var id int
 
-	err := DB.QueryRow("SELECT id FROM users WHERE role = 1 ORDER BY " +
-		"random() LIMIT 1;").
+	err := DB.QueryRow("SELECT id FROM users WHERE role=$1 ORDER BY " +
+		"random() LIMIT 1;", ROLEDOCTOR).
 		Scan(&id)
 
 	switch {

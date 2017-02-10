@@ -2,7 +2,6 @@ package data
 
 import (
 	"database/sql"
-	"strconv"
 )
 
 type Case struct {
@@ -30,13 +29,27 @@ func (c *Case) Put() (int, error) {
 	return id, nil
 }
 
-func GetCaseByIdCreatorId(idStr string, cId int) (*Case, error) {
-	cIdStr := strconv.Itoa(cId)
-
+func GetCaseByIdCreatorId(cId int, caseId int) (*Case, error) {
 	c := Case{}
 	err := DB.QueryRow("SELECT id, creatorid, doctorid FROM cases WHERE " +
 		"id=$1 AND creatorid=$2;",
-		idStr, cIdStr).Scan(&c.ID, &c.CreatorId, &c.DoctorId)
+		caseId, cId).Scan(&c.ID, &c.CreatorId, &c.DoctorId)
+
+	switch {
+	case err == sql.ErrNoRows:
+		return nil, nil
+	case err != nil:
+		return nil, err
+	default:
+		return &c, nil
+	}
+}
+
+func GetCaseByIdDoctorId(dId int, cId int) (*Case, error) {
+	c := Case{}
+	err := DB.QueryRow("SELECT id, creatorid, doctorid FROM cases WHERE " +
+		"id=$1 AND doctorid=$2;",
+		dId, cId).Scan(&c.ID, &c.CreatorId, &c.DoctorId)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -49,9 +62,30 @@ func GetCaseByIdCreatorId(idStr string, cId int) (*Case, error) {
 }
 
 func GetCasesByCreatorId(cId int) ([]int, error) {
-	cIdStr := strconv.Itoa(cId)
+	rows, err := DB.Query("SELECT id FROM cases WHERE creatorid=$1", cId)
 
-	rows, err := DB.Query("SELECT id FROM cases WHERE creatorid=$1", cIdStr)
+	if err == sql.ErrNoRows {
+		return []int{}, nil
+	} else if err != nil {
+		return []int{}, err
+	}
+
+	var id int
+	cases := []int{}
+
+	for rows.Next() {
+		err = rows.Scan(&id)
+		if err != nil {
+			return []int{}, err
+		}
+		cases = append(cases, id)
+	}
+
+	return cases, nil
+}
+
+func GetCasesByDoctorId(dId int) ([]int, error) {
+	rows, err := DB.Query("SELECT id FROM cases WHERE doctorid=$1", dId)
 
 	if err == sql.ErrNoRows {
 		return []int{}, nil

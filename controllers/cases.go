@@ -1,6 +1,7 @@
 package controllers
 
 import(
+	"errors"
 	"html/template"
 	"log"
 	"net/http"
@@ -21,6 +22,12 @@ func NewCase(w http.ResponseWriter, r *http.Request) {
 	if user == nil {
 		log.Println("Not logged in")
 		serveNotFound(w, r)
+		return
+	}
+
+	if user.Role != data.ROLEPATIENT {
+		log.Println("Only patients can create cases")
+		serveBadRequest(w, r)
 		return
 	}
 
@@ -45,8 +52,16 @@ func NewCase(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetCase(w http.ResponseWriter, r *http.Request) {
+	var c *data.Case
+
 	vars := mux.Vars(r)
 	caseIdStr := vars["caseId"]
+	caseId, err := strconv.Atoi(caseIdStr)
+	if err != nil {
+		log.Println("Error when converting case id to int: " + err.Error())
+		serveInternalServerError(w, r)
+		return
+	}
 
 	user, err := getSessionUser(r)
 	if err != nil {
@@ -61,14 +76,22 @@ func GetCase(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c, err := data.GetCaseByIdCreatorId(caseIdStr, user.ID)
+	switch user.Role {
+	case data.ROLEPATIENT:
+		c, err = data.GetCaseByIdCreatorId(caseId, user.ID)
+	case data.ROLEDOCTOR:
+		c, err = data.GetCaseByIdDoctorId(caseId, user.ID)
+	default:
+		err = errors.New("Incorrect role id")
+	}
+
 	if err != nil {
-		log.Println("Couldn't get case id " + caseIdStr)
+		log.Println("Couldn't get case id " + caseIdStr + ":" + err.Error())
 		serveInternalServerError(w, r)
 		return
 	}
 	if c == nil {
-		log.Println("Cased id " + caseIdStr + " not found in db; " +
+		log.Println("Case id " + caseIdStr + " not found in db; " +
 			"User id " + strconv.Itoa(user.ID))
 		serveNotFound(w, r)
 		return
@@ -94,4 +117,3 @@ func GetCase(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-

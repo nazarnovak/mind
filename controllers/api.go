@@ -33,10 +33,17 @@ type Message struct {
 }
 
 func GetCaseMessages(w http.ResponseWriter, r *http.Request) {
+	var c *data.Case
 	var msgs []data.Message
 
 	vars := mux.Vars(r)
 	caseIdStr := vars["caseId"]
+	caseId, err := strconv.Atoi(caseIdStr)
+	if err != nil {
+		log.Println("Error when converting case id to int: " + err.Error())
+		serveInternalServerError(w, r)
+		return
+	}
 
 	user, err := getSessionUser(r)
 	if err != nil {
@@ -51,7 +58,15 @@ func GetCaseMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c, err := data.GetCaseByIdCreatorId(caseIdStr, user.ID)
+	switch user.Role {
+	case data.ROLEPATIENT:
+		c, err = data.GetCaseByIdCreatorId(caseId, user.ID)
+	case data.ROLEDOCTOR:
+		c, err = data.GetCaseByIdDoctorId(caseId, user.ID)
+	default:
+		err = errors.New("Incorrect role id")
+	}
+
 	if err != nil {
 		log.Println("Error while getting case with id " + caseIdStr +
 			":" + err.Error())
@@ -90,8 +105,16 @@ func GetCaseMessages(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateCaseMessage(w http.ResponseWriter, r *http.Request) {
+	var c *data.Case
+
 	vars := mux.Vars(r)
 	caseIdStr := vars["caseId"]
+	caseId, err := strconv.Atoi(caseIdStr)
+	if err != nil {
+		log.Println("Error when converting case id to int: " + err.Error())
+		serveInternalServerError(w, r)
+		return
+	}
 
 	user, err := getSessionUser(r)
 	if err != nil {
@@ -106,7 +129,14 @@ func CreateCaseMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c, err := data.GetCaseByIdCreatorId(caseIdStr, user.ID)
+	switch user.Role {
+	case data.ROLEPATIENT:
+		c, err = data.GetCaseByIdCreatorId(caseId, user.ID)
+	case data.ROLEDOCTOR:
+		c, err = data.GetCaseByIdDoctorId(caseId, user.ID)
+	default:
+		err = errors.New("Incorrect role id")
+	}
 	if err != nil {
 		log.Println("Error while getting case with id " + caseIdStr +
 			":" + err.Error())
