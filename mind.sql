@@ -75,7 +75,9 @@ ALTER SEQUENCE case_events_id_seq OWNED BY case_events.id;
 --
 
 CREATE TABLE cases (
-    id integer NOT NULL
+    id integer NOT NULL,
+    creatorid integer,
+    doctorid integer DEFAULT 0
 );
 
 
@@ -162,6 +164,26 @@ ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regcl
 --
 
 COPY case_events (id, caseid, userid, typeid, created, content) FROM stdin;
+23	14	0	0	2017-02-09 20:16:44+02	Welcome to Min Doktor
+24	15	0	0	2017-02-09 20:16:49+02	Welcome to Min Doktor
+25	14	111	0	2017-02-09 20:18:07+02	Hello :)
+26	14	111	0	2017-02-10 12:13:01+02	/submit something
+27	14	111	0	2017-02-10 12:14:10+02	/submit
+28	14	111	0	2017-02-10 12:14:31+02	/submit
+29	15	111	0	2017-02-10 12:14:39+02	/submit
+30	17	0	0	2017-02-10 12:15:06+02	Welcome to Min Doktor
+31	17	111	0	2017-02-10 12:17:43+02	/submit
+32	17	111	0	2017-02-10 12:20:21+02	/submit
+33	14	9	0	2017-02-10 15:29:29+02	doctor here :)
+34	17	9	0	2017-02-10 15:29:38+02	hi
+35	18	0	0	2017-02-10 15:31:00+02	Welcome to Min Doktor
+36	19	0	0	2017-02-11 11:21:20+02	Welcome to Min Doktor
+37	14	9	0	2017-02-11 11:21:50+02	how are you
+38	14	111	0	2017-02-11 11:26:32+02	fine :D
+39	14	111	0	2017-02-11 11:26:37+02	:)
+40	14	111	0	2017-02-11 11:26:40+02	@support help me
+41	14	9	0	2017-02-11 11:31:34+02	:D
+42	17	9	0	2017-02-11 11:31:51+02	how are you?
 \.
 
 
@@ -169,14 +191,18 @@ COPY case_events (id, caseid, userid, typeid, created, content) FROM stdin;
 -- Name: case_events_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('case_events_id_seq', 1, false);
+SELECT pg_catalog.setval('case_events_id_seq', 42, true);
 
 
 --
 -- Data for Name: cases; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY cases (id) FROM stdin;
+COPY cases (id, creatorid, doctorid) FROM stdin;
+14	111	9
+15	111	10
+17	111	9
+19	111	0
 \.
 
 
@@ -184,7 +210,7 @@ COPY cases (id) FROM stdin;
 -- Name: cases_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('cases_id_seq', 1, false);
+SELECT pg_catalog.setval('cases_id_seq', 19, true);
 
 
 --
@@ -194,6 +220,10 @@ SELECT pg_catalog.setval('cases_id_seq', 1, false);
 COPY users (id, name, role) FROM stdin;
 0	MinDoktor	0
 111	Nazar Novak	0
+8	Patient X	0
+9	Doctor X	1
+10	Doctor Y	1
+11	Doctor Z	1
 \.
 
 
@@ -201,7 +231,7 @@ COPY users (id, name, role) FROM stdin;
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('users_id_seq', 1, false);
+SELECT pg_catalog.setval('users_id_seq', 11, true);
 
 
 --
