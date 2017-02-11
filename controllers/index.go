@@ -13,6 +13,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	var userName string
 	var userRole int
 	var casesIds []int
+	var otherCasesIds []int
 
 	user, err := getSessionUser(r)
 	if err != nil {
@@ -28,8 +29,20 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		switch user.Role {
 		case data.ROLEPATIENT:
 			casesIds, err = data.GetCasesByCreatorId(user.ID)
+			if err != nil {
+				log.Println("Error getting patient cases:" + err.Error())
+				serveInternalServerError(w, r)
+				return
+			}
+			otherCasesIds, err = data.GetPatientAlienCasesId(user.ID)
 		case data.ROLEDOCTOR:
 			casesIds, err = data.GetCasesByDoctorId(user.ID)
+			if err != nil {
+				log.Println("Error getting patient cases:" + err.Error())
+				serveInternalServerError(w, r)
+				return
+			}
+			otherCasesIds, err = data.GetDoctorAlienCasesId(user.ID)
 		default:
 			err = errors.New("Unknown role")
 		}
@@ -45,10 +58,12 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		UserName string
 		UserRole int
 		Cases []int
+		OtherCases []int
 	}{
 		userName,
 		userRole,
 		casesIds,
+		otherCasesIds,
 	}
 
 	tpl := template.Must(template.ParseFiles(

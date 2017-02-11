@@ -135,3 +135,49 @@ func AssignDoctorToCase(doctorId int, caseId int) error {
 
 	return nil
 }
+
+func GetPatientAlienCasesId(cId int) ([]int, error) {
+	rows, err := DB.Query("SELECT id FROM cases WHERE creatorid!=$1", cId)
+
+	if err == sql.ErrNoRows {
+		return []int{}, nil
+	} else if err != nil {
+		return []int{}, err
+	}
+
+	var id int
+	cases := []int{}
+
+	for rows.Next() {
+		err = rows.Scan(&id)
+		if err != nil {
+			return []int{}, err
+		}
+		cases = append(cases, id)
+	}
+
+	return cases, nil
+}
+
+func GetDoctorAlienCasesId(cId int) ([]int, error) {
+	rows, err := DB.Query("SELECT id FROM cases WHERE doctorid!=$1", cId)
+
+	if err == sql.ErrNoRows {
+		return []int{}, nil
+	} else if err != nil {
+		return []int{}, err
+	}
+
+	var id int
+	cases := []int{}
+
+	for rows.Next() {
+		err = rows.Scan(&id)
+		if err != nil {
+			return []int{}, err
+		}
+		cases = append(cases, id)
+	}
+
+	return cases, nil
+}

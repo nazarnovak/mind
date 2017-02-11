@@ -36,6 +36,16 @@
         </ul>
     </div>
     {{end}}
+    {{if .OtherCases}}
+    <div class="container">
+        <h4>Other cases:</h4>
+        <ul id="cases-list">
+            {{range .OtherCases}}
+            <li><a href="/cases/{{.}}">Case #{{.}}</a></li>
+            {{end}}
+        </ul>
+    </div>
+    {{end}}
 {{end}}
 
 {{define "scripts"}}{{end}}

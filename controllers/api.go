@@ -160,7 +160,7 @@ func CreateCaseMessage(w http.ResponseWriter, r *http.Request) {
 		serveNotFound(w, r)
 		return
 	}
-log.Println(user.Role, caseId, user.ID)
+
 	switch user.Role {
 	case data.ROLEPATIENT:
 		c, err = data.GetCaseByIdCreatorId(caseId, user.ID)
