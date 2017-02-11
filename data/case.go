@@ -29,7 +29,23 @@ func (c *Case) Put() (int, error) {
 	return id, nil
 }
 
-func GetCaseByIdCreatorId(cId int, caseId int) (*Case, error) {
+func GetCaseById(cId int) (*Case, error) {
+	c := Case{}
+	err := DB.QueryRow("SELECT id, creatorid, doctorid FROM cases WHERE " +
+		"id=$1;",
+		cId).Scan(&c.ID, &c.CreatorId, &c.DoctorId)
+
+	switch {
+	case err == sql.ErrNoRows:
+		return nil, nil
+	case err != nil:
+		return nil, err
+	default:
+		return &c, nil
+	}
+}
+
+func GetCaseByIdCreatorId(caseId int, cId int) (*Case, error) {
 	c := Case{}
 	err := DB.QueryRow("SELECT id, creatorid, doctorid FROM cases WHERE " +
 		"id=$1 AND creatorid=$2;",
@@ -45,11 +61,11 @@ func GetCaseByIdCreatorId(cId int, caseId int) (*Case, error) {
 	}
 }
 
-func GetCaseByIdDoctorId(dId int, cId int) (*Case, error) {
+func GetCaseByIdDoctorId(cId int, dId int) (*Case, error) {
 	c := Case{}
 	err := DB.QueryRow("SELECT id, creatorid, doctorid FROM cases WHERE " +
 		"id=$1 AND doctorid=$2;",
-		dId, cId).Scan(&c.ID, &c.CreatorId, &c.DoctorId)
+		cId, dId).Scan(&c.ID, &c.CreatorId, &c.DoctorId)
 
 	switch {
 	case err == sql.ErrNoRows:

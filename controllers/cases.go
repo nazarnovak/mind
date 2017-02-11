@@ -1,7 +1,6 @@
 package controllers
 
 import(
-	"errors"
 	"html/template"
 	"log"
 	"net/http"
@@ -76,13 +75,13 @@ func GetCase(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	switch user.Role {
-	case data.ROLEPATIENT:
-		c, err = data.GetCaseByIdCreatorId(caseId, user.ID)
-	case data.ROLEDOCTOR:
-		c, err = data.GetCaseByIdDoctorId(caseId, user.ID)
-	default:
-		err = errors.New("Incorrect role id")
+	c, err = data.GetCaseById(caseId)
+
+	if user.Role != data.ROLEDOCTOR && user.ID != c.CreatorId {
+		log.Println("Patient can't view cases of other " +
+			"patients")
+		serveNotFound(w, r)
+		return
 	}
 
 	if err != nil {

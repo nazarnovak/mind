@@ -35,6 +35,7 @@ type Message struct {
 func GetCaseMessages(w http.ResponseWriter, r *http.Request) {
 	var c *data.Case
 	var msgs []data.Message
+	var hideNames bool
 
 	vars := mux.Vars(r)
 	caseIdStr := vars["caseId"]
@@ -58,13 +59,24 @@ func GetCaseMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	c, err = data.GetCaseById(caseId)
+
 	switch user.Role {
 	case data.ROLEPATIENT:
-		c, err = data.GetCaseByIdCreatorId(caseId, user.ID)
+		if user.ID != c.CreatorId {
+			log.Println("Patient can't view cases of other " +
+				"patients")
+			serveNotFound(w, r)
+			return
+		}
 	case data.ROLEDOCTOR:
-		c, err = data.GetCaseByIdDoctorId(caseId, user.ID)
+		if user.ID != c.DoctorId {
+			hideNames = true
+		}
+
 	default:
-		err = errors.New("Incorrect role id")
+		log.Println("Unknown role")
+		serveBadRequest(w, r)
 	}
 
 	if err != nil {
@@ -97,11 +109,31 @@ func GetCaseMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if hideNames {
+		msgs = replaceNamesWithStars(msgs)
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(msgs)
 	if err != nil {
 		serveInternalServerError(w, r)
 	}
+}
+
+func replaceNamesWithStars(msgs []data.Message) []data.Message {
+	if msgs == nil {
+		return msgs
+	}
+
+	for i, ce := range msgs {
+		if ce.Content == data.Greet {
+			continue
+		}
+
+		msgs[i].UserName = "******"
+	}
+
+	return msgs
 }
 
 func CreateCaseMessage(w http.ResponseWriter, r *http.Request) {
@@ -128,7 +160,7 @@ func CreateCaseMessage(w http.ResponseWriter, r *http.Request) {
 		serveNotFound(w, r)
 		return
 	}
-
+log.Println(user.Role, caseId, user.ID)
 	switch user.Role {
 	case data.ROLEPATIENT:
 		c, err = data.GetCaseByIdCreatorId(caseId, user.ID)
@@ -143,6 +175,7 @@ func CreateCaseMessage(w http.ResponseWriter, r *http.Request) {
 		serveInternalServerError(w, r)
 		return
 	}
+
 	if c == nil {
 		log.Println("Error finding case with id " + caseIdStr)
 		serveNotFound(w, r)
