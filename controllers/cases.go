@@ -56,11 +56,6 @@ func GetCase(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	caseIdStr := vars["caseId"]
 	caseId, err := strconv.Atoi(caseIdStr)
-	if err != nil {
-		log.Println("Error when converting case id to int: " + err.Error())
-		serveInternalServerError(w, r)
-		return
-	}
 
 	user, err := getSessionUser(r)
 	if err != nil {
