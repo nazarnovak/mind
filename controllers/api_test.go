@@ -7,21 +7,21 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/nazarnovak/mind/data"
 	"github.com/gorilla/mux"
+	"github.com/nazarnovak/mind/data"
 )
 
-var Router = mux.NewRouter()
-
-var baseUrl = "http://localhost:8080/"
-var user = data.User{111, "Nazar", 0}
+var baseUrl = "http://localhost:8080"
+//var userName = "Nazar Novak"
+var user = data.User{111, "Nazar Novak", 0}
 var caseId = 15
 
 // CreateCaseMessage
-func TestNoUserInSession(t *testing.T) {
+func ATestNoUserInSession(t *testing.T) {
 	caseIdStr := strconv.Itoa(caseId)
 
-	req, err := http.NewRequest("POST", "/cases/" + caseIdStr + "/events",nil)
+	req, err := http.NewRequest("POST", baseUrl + "/cases/" + caseIdStr +
+		"/events",nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -37,27 +37,36 @@ func TestNoUserInSession(t *testing.T) {
 	}
 }
 
-func ATestNoCaseFound(t *testing.T) {
+//func loginUser() {
+//	loginUrl := baseUrl + "/login"
+//
+//	_, err := http.PostForm(loginUrl, url.Values{"user": {userName}})
+//	if err != nil {
+//		log.Fatalln(err)
+//	}
+//}
+
+func TestNoCaseFound(t *testing.T) {
+	//loginUser()
 	caseIdStr := strconv.Itoa(caseId)
 
-	reqUrl := "/api/cases/" + caseIdStr + "/events"
-log.Println(reqUrl)
+	reqUrl := baseUrl + "/api/cases/" + caseIdStr + "/events"
+
 	req, err := http.NewRequest("POST", reqUrl,nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	rr := httptest.NewRecorder()
-//Extract caseId from url/use Gorilla mux
-	route := Router.NewRoute().
+
+	Router := mux.NewRouter()
+	Router.NewRoute().
 		Methods("POST").
 		Path("/api/cases/{caseId:[0-9]+}/events").
 		HandlerFunc(CreateCaseMessage)
-
+// set in Gorilla session
 	setSessionUser(rr, req, &user)
-
-	handler := route.GetHandler()
-	handler.ServeHTTP(rr, req)
+	Router.ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusNotFound {
 		t.Errorf("Handler returned wrong code: expected %v, got %v",

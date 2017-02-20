@@ -137,7 +137,7 @@ func CreateCaseMessage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	caseIdStr := vars["caseId"]
 	caseId, err := strconv.Atoi(caseIdStr)
-//log.Println(caseIdStr)
+
 	user, err := getSessionUser(r)
 	if err != nil {
 		log.Println("Error while getting user from session: " + err.Error())
